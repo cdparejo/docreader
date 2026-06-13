@@ -8,6 +8,7 @@ import { createClient } from "@/lib/supabase/client";
 
 interface User {
   user_id: string;
+  email: string;
   role: "admin" | "user";
   created_at: string;
   user_profiles: {
@@ -298,7 +299,7 @@ export default function AdminUsersPage() {
                   users.map((user) => (
                     <tr key={user.user_id} className="hover:bg-gray-50">
                       <td className="px-6 py-4 text-sm text-gray-900">
-                        {user.display_name || "Sin nombre"}
+                        {user.user_profiles?.[0]?.display_name || "Sin nombre"}
                       </td>
                       <td className="px-6 py-4 text-sm text-gray-600">
                         {user.email || "---"}
