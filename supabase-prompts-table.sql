@@ -1,0 +1,100 @@
+-- Crear tabla de prompts generales
+CREATE TABLE prompts (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  template_name TEXT NOT NULL UNIQUE,
+  prompt_text TEXT NOT NULL,
+  description TEXT,
+  created_at TIMESTAMP DEFAULT NOW(),
+  updated_at TIMESTAMP DEFAULT NOW(),
+  updated_by UUID REFERENCES auth.users(id)
+);
+
+-- Insertar prompts por defecto
+INSERT INTO prompts (template_name, prompt_text, description) VALUES
+('general', 'Analiza el documento y extrae la información en las siguientes secciones:
+- **Título o Asunto**: El título o asunto principal del documento
+- **Fecha**: La fecha del documento (si aparece)
+- **Partes Involucradas**: Las personas, empresas u organizaciones mencionadas
+- **Montos**: Los montos monetarios o cantidades relevantes
+- **Conceptos Clave**: Los puntos principales o conceptos relevantes en el documento
+
+Formatea la respuesta de manera clara y estructurada.', 'Plantilla general para análisis de documentos'),
+
+('factura', 'Extrae de esta factura la siguiente información:
+- **Número de Factura**: El número de comprobante
+- **Tipo**: Tipo de factura (A, B, C, etc.)
+- **Fecha**: Fecha de emisión
+- **Emisor**: Nombre y CUIT del emisor
+- **Receptor**: Nombre y CUIT del receptor
+- **Neto**: Monto neto (sin impuestos)
+- **IVA**: Impuesto al Valor Agregado
+- **Percepciones**: Montos retenidos o percibidos (si aplica)
+- **Total**: Monto total
+- **CAE y Fecha de CAE**: Código de Autorización Electrónico (si aplica)
+- **Condición de Pago**: Términos de pago
+- **Conceptos**: Lista de productos o servicios facturados
+
+Formatea como JSON o texto estructurado.', 'Extracción de datos de facturas'),
+
+('contrato', 'Extrae del contrato la siguiente información:
+- **Partes**: Nombre, DNI/CUIT de cada parte
+- **Objeto**: ¿Qué es el contrato? (venta, servicio, alquiler, etc.)
+- **Fecha de Inicio**: Cuándo comienza la vigencia
+- **Fecha de Vencimiento**: Cuándo termina la vigencia
+- **Monto**: Valor o precio del contrato
+- **Cláusulas Clave**: Las 3-5 cláusulas más importantes
+- **Penalidades**: Sanciones o multas por incumplimiento (si aplica)
+- **Rescisión**: Cómo se puede rescindir el contrato
+- **Firmas**: Quiénes firman y fechas de firma
+
+Presenta la información de manera clara y legible.', 'Extracción de datos de contratos'),
+
+('liquidacion', 'Extrae de esta liquidación de sueldo:
+- **Período**: Período de liquidación (mes y año)
+- **Empleado**: Nombre del empleado
+- **CUIL**: Código Único de Identificación Laboral
+- **Legajo**: Número de legajo (si aparece)
+- **Categoría**: Cargo o categoría del empleado
+- **Haberes Brutos**: Salario bruto y otros haberes
+- **Descuentos**: Impuestos, aportes y otras deducciones
+- **Neto**: Monto neto a recibir
+- **Aportes Patronales**: Contribuciones del empleador (si aparecen)
+
+Detalla cada rubro y monto.', 'Extracción de datos de liquidaciones de sueldo'),
+
+('impuesto', 'Extrae de este documento tributario:
+- **Tipo de Tributo**: Qué tipo de impuesto (IVA, Ganancias, Ingresos Brutos, etc.)
+- **Período**: Período fiscal correspondiente
+- **CUIT**: CUIT del contribuyente
+- **Jurisdicción**: Jurisdicción fiscal (nacional, provincial, municipal)
+- **Base Imponible**: Monto sobre el que se calcula el impuesto
+- **Alícuota**: Tasa o porcentaje aplicado
+- **Monto Determinado**: Impuesto determinado o a pagar
+- **Ingresado**: Monto ya pagado o ingresado
+- **Saldo**: Diferencia a favor o en contra
+- **Formulario AFIP**: Número de formulario (F. 1042, F. 1028, etc.)
+
+Presenta con claridad todos los montos y conceptos.', 'Extracción de datos tributarios'),
+
+('informe', 'Extrae de este informe:
+- **Título**: Título o nombre del informe
+- **Período**: Período cubierto por el informe
+- **Autor/Área**: Quién preparó el informe
+- **Destinatario**: A quién está dirigido
+- **Conclusiones**: Las conclusiones o recomendaciones principales
+- **Métricas Clave**: Números, porcentajes o indicadores importantes
+- **Recomendaciones**: Acciones o cambios recomendados
+- **Resumen Ejecutivo**: Un resumen breve del contenido
+
+Mantén la estructura y los detalles importantes.', 'Extracción de datos de informes');
+
+-- RLS Policy: Solo el dueño puede ver/editar sus propios prompts
+ALTER TABLE prompts ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Prompts are viewable by authenticated users"
+  ON prompts FOR SELECT
+  USING (auth.role() = 'authenticated');
+
+CREATE POLICY "Prompts are updatable by authenticated users"
+  ON prompts FOR UPDATE
+  USING (auth.role() = 'authenticated');
