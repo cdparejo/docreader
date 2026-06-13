@@ -62,14 +62,3 @@ export async function extractWithAnthropic(
     cost: costCalc.total_cost,
   };
 }
-
-/**
- * Valida que la API key de Anthropic esté configurada
- */
-export function validateAnthropicKey(): void {
-  if (!process.env.ANTHROPIC_API_KEY) {
-    throw new Error(
-      "ANTHROPIC_API_KEY no está configurada en las variables de entorno"
-    );
-  }
-}

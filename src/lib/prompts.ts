@@ -1,7 +1,6 @@
 export type Template = "general" | "factura" | "contrato" | "liquidacion" | "impuesto" | "informe";
 
-// Prompts por defecto (usados si la BD no está disponible)
-const defaultPrompts: Record<Template, string> = {
+const DEFAULT_PROMPTS: Record<Template, string> = {
   general: `Analiza el documento y extrae la información en las siguientes secciones:
 - **Título o Asunto**: El título o asunto principal del documento
 - **Fecha**: La fecha del documento (si aparece)
@@ -80,11 +79,8 @@ Presenta con claridad todos los montos y conceptos.`,
 Mantén la estructura y los detalles importantes.`,
 };
 
-let prompts: Record<Template, string> = { ...defaultPrompts };
-
 export function buildPrompt(template: Template, customFields?: string[]): string {
   if (template === "general" && customFields && customFields.length > 0) {
-    // Modo personalizado
     const fieldsList = customFields.map((field, index) => `${index + 1}. ${field}`).join("\n");
     return `Extrae los siguientes campos del documento con formato "Campo: Valor". Si un campo no está presente, indica "No encontrado".
 
@@ -94,5 +90,5 @@ Proporciona la información de manera clara y estructurada.`;
   }
 
   const typedTemplate = template as Template;
-  return prompts[typedTemplate] || defaultPrompts.general;
+  return DEFAULT_PROMPTS[typedTemplate] || DEFAULT_PROMPTS.general;
 }
