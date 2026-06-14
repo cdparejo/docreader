@@ -27,13 +27,17 @@ export default function LoginPage() {
 
       if (signInError) {
         setError(signInError.message);
+        setLoading(false);
         return;
       }
 
+      // Pequeño delay para permitir que las cookies se sincronicen
+      await new Promise(resolve => setTimeout(resolve, 300));
+
+      // Navegar a home - el middleware verificará la sesión
       router.push("/");
     } catch (err) {
       setError("Error al iniciar sesión");
-    } finally {
       setLoading(false);
     }
   };

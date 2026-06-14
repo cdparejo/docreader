@@ -21,19 +21,32 @@ export function Navbar() {
         } = await supabase.auth.getUser();
         setUser(user);
 
-        // Obtener el nombre de usuario
+        // Obtener el nombre de usuario y rol si el usuario existe
         if (user) {
-          const profileResponse = await fetch("/api/user/profile");
-          if (profileResponse.ok) {
-            const profile = await profileResponse.json();
-            setDisplayName(profile.display_name || user.email?.split("@")[0] || "Usuario");
+          try {
+            // Obtener perfil
+            const profileResponse = await fetch("/api/user/profile");
+            if (profileResponse.ok) {
+              const profile = await profileResponse.json();
+              const displayNameValue = profile?.display_name || user.email?.split("@")[0] || "Usuario";
+              setDisplayName(displayNameValue);
+            } else {
+              setDisplayName(user.email?.split("@")[0] || "Usuario");
+            }
+          } catch (error) {
+            console.error("Error fetching profile:", error);
+            setDisplayName(user.email?.split("@")[0] || "Usuario");
           }
 
-          // Verificar si es admin
-          const roleResponse = await fetch("/api/user/role");
-          if (roleResponse.ok) {
-            const roleData = await roleResponse.json();
-            setIsAdmin(roleData.role === "admin");
+          try {
+            // Obtener rol
+            const roleResponse = await fetch("/api/user/role");
+            if (roleResponse.ok) {
+              const roleData = await roleResponse.json();
+              setIsAdmin(roleData.role === "admin");
+            }
+          } catch (error) {
+            console.error("Error fetching role:", error);
           }
         }
       } catch (error) {
